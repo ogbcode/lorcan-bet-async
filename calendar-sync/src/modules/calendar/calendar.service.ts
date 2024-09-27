@@ -125,6 +125,7 @@ async listUserCalendars(accessToken: string): Promise<CalendarListEntry[]> {
 
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
+      
     }
 
     // Fetch calendars associated with the user

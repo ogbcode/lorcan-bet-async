@@ -31,17 +31,23 @@ export class CalendarController {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
   }
-
   @Post('sync')
   @Version("1")
   @ApiOperation({ summary: 'Sync Google Calendar events to internal system' })
   @ApiResponse({ status: 200, description: 'Events synced successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid input.' })
   async syncGoogleEvents(@Req() req: any): Promise<{ message: string }> {
-    const { userId, accessToken } = req.body;
+    const { userId } = req.body;
 
-    if (!userId || !accessToken) {
-      throw new BadRequestException('userId and accessToken are required');
+    // Extract access token from the Authorization header
+    const authHeader = req.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new BadRequestException('Authorization header with Bearer token is required');
+    }
+
+    const accessToken = authHeader.split(' ')[1];
+    if (!userId) {
+      throw new BadRequestException('userId is required');
     }
 
     try {
@@ -49,18 +55,17 @@ export class CalendarController {
         topic: 'sync_google_calendar',
         messages: [
           {
-            value: JSON.stringify({ userId: userId, accessToken: accessToken }),
+            value: JSON.stringify({ userId, accessToken }),
           },
         ],
       });
       
-      return { message: 'Sync request submitted successfully' };
+      return { message: 'Calendar Sync request enqued successfully' };
     } catch (error) {
       this.logger.error(`Failed to emit sync request: ${error.message}`);
       throw new InternalServerErrorException('Error submitting sync request');
     }
   }
-
   @Get('/:calendarId/events')
   @Version("1")
   @ApiOperation({ summary: 'Get all events for a specific calendar' })
@@ -75,7 +80,7 @@ export class CalendarController {
     }
   }
 
-  @Post('/event/update')
+  @Post('/event/webhook')
   @Version("1")
   
   @ApiOperation({ summary: 'Sync event updates from Google Calendar' })
@@ -83,9 +88,6 @@ export class CalendarController {
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async syncEventChanges(@Body() eventData: CalendarEvent): Promise<{ message: string }> {
-    if (!eventData || !eventData.id) {
-      throw new BadRequestException('Event data with an ID is required');
-    }
 
     try {
    
@@ -99,7 +101,7 @@ export class CalendarController {
         ],
       });
 
-      return { message: 'Sync request enqueued successfully' };
+      return { message: 'Event Sync request enqueued successfully' };
     } catch (error) {
       this.logger.error(`Error enqueuing sync request for event ${eventData.id}: ${error.message}`);
       throw new InternalServerErrorException('Error enqueuing sync request');

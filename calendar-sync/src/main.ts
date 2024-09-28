@@ -11,6 +11,7 @@ async function bootstrap() {
     .setTitle(process.env.APP_NAME || 'API')
     .setDescription(process.env.APP_DESCRIPTION || 'API Documentation')
     .setVersion(process.env.API_VERSION || '1.0')
+    .addServer('/backend/v1')
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig, {

@@ -22,7 +22,7 @@ export class KafkaConsumer implements OnModuleInit {
   async onModuleInit() {
     await Promise.all([
       this.consumeGoogleCalendarSync(),
-      // this.consumeEventUpdates(),
+      this.consumeEventUpdates(),
     ]);
   }
 
@@ -32,13 +32,13 @@ export class KafkaConsumer implements OnModuleInit {
    */
   private async consumeGoogleCalendarSync() {
     await this.consumerService.consume(
-      { topic: 'sync_google_calendar' },
+      { topic: 'sync_google_calendar' ,},
       {
         eachMessage: async (payload: EachMessagePayload) => {
           console.log(`Received message from sync_google_calendar topic.`);
           await this.handleSyncGoogleCalendarMessage(payload);
         },
-      }
+      },'nestjs-kafka'
     );
   }
 
@@ -54,7 +54,7 @@ export class KafkaConsumer implements OnModuleInit {
           this.logger.debug(`Received message from sync_events_update topic.`);
           await this.handleEventUpdates(payload);
         },
-      }
+      },"nestjs-kafka-event"
     );
   }
 

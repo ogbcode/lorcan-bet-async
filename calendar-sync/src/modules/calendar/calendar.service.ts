@@ -106,17 +106,16 @@ async listUserCalendars(accessToken: string): Promise<CalendarListEntry[]> {
       };
       const existingEvent = await this.eventService.findOneByGoogleId(googleEventId);
       if (existingEvent) {
-        // If the event exists, update it
-        // console.log("Existing event found, updating...");
+     
         //await this.eventService.updateEvent(existingEvent.id, eventData);
     } else {
-        // If the event does not exist, add it
-        console.log("No existing event found, adding new event...");
+        // // If the event does not exist, add it
+       
         await this.addEvent(eventData);
     
     }
   }
-    await this.watchGoogleCalendar(calendarId, accessToken,channelId);
+    await this.watchGoogleCalendar(channelId,calendarId, accessToken,);
   }
   
   
@@ -125,7 +124,6 @@ async listUserCalendars(accessToken: string): Promise<CalendarListEntry[]> {
 
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
-      
     }
 
     // Fetch calendars associated with the user
@@ -143,22 +141,21 @@ async listUserCalendars(accessToken: string): Promise<CalendarListEntry[]> {
           Authorization: `Bearer ${accessToken}`,
         },
         data: {
-          id:channelId, 
+          id: channelId, 
           type: 'webhook',
           address: process.env.WEBHOOKURL,
         },
       });
-      console.log(response.data)
+      console.log(" Calelndar webhook succefully created ")
       return response.data;
-      
     } catch (error) {
       
-      if (error.response && error.response.status === 409) { // 409 Conflict error for duplicate channel
-        // console.log(`Channel for calendar ID ${googleCalendarId} already exists. Leaving the existing channel in place.`);
-        return { message: 'Channel already exists, leaving the existing channel in place.' }; // Or return any relevant data
+      if (error.response.status === 400) {
+        // console.log(`Channel for calendar ID ${channelId} already exists. Leaving the existing channel in place.`);
+        return { message: 'Channel already exists, leaving the existing channel in place.' };
       } else {
         
-        // console.log(`Failed to watch Google Calendar: ${googleCalendarId}`, error.message);
+        console.log(`Failed to watch Google Calendar: `, error.message);
      
       }
     }

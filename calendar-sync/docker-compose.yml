@@ -25,17 +25,6 @@ services:
     ports:
       - '9092:9092'
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: localhost:9092
-    ports:
-      - "8080:8080"
-    depends_on:
-      - kafka
-
   postgres: 
     image: postgres:13
     container_name: postgres
@@ -54,20 +43,3 @@ services:
     ports:
       - "5050:80"
       
-  nestjs-app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: nestjs-app
-    depends_on:
-      - kafka
-      - postgres # Add this line
-    environment:
-      KAFKA_BROKERS: localhost:9092
-      DATABASE_HOST: postgres 
-      DATABASE_PORT: 5432
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: admin
-      DATABASE_NAME: Ferocia
-    ports:
-      - "3000:3000"

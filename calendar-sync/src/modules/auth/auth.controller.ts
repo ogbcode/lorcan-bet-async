@@ -95,6 +95,7 @@ export class AuthController {
     }
   }
 
+
   /**
    * Logs out the user and clears JWT cookie
    * @param {Response} res Express Response object
